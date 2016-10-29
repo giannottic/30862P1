@@ -11,6 +11,10 @@ public class Sprite {
     // velocity (pixels per millisecond)
     private float dx;
     private float dy;
+    
+    //Alan
+    public int health = 20;
+    public double cur_pos = 192.0; //Initial Drop point
 
     /**
         Creates a new Sprite object with the specified Animation.
@@ -119,4 +123,21 @@ public class Sprite {
     public Object clone() {
         return new Sprite(anim);
     }
+    
+    //Alan
+//    public static int getHealth() {
+////    	System.out.println(System.currentTimeMillis());
+////    	Math.round(System.currentTimeMillis()/1000);
+////    	if ((System.currentTimeMillis() % 1000) == 0) {
+////    		System.out.println("1 Second has passed");
+////    	}
+//    	return health;
+//    }
+   
+//    //Alan
+//    public int getHealth() {
+//    	health = Player.getHealth();
+//    	return health;
+//    }
+    
 }

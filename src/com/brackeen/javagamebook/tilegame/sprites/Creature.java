@@ -25,6 +25,7 @@ public abstract class Creature extends Sprite {
     private Animation deadRight;
     private int state;
     private long stateTime;
+    public int health = 20;
 
     /**
         Creates a new Creature with the specified Animations.
@@ -172,5 +173,11 @@ public abstract class Creature extends Sprite {
             setState(STATE_DEAD);
         }
     }
+    
+//    //Alan
+//    public int getHealth() {
+//    	return health;
+//    }
+   
 
 }

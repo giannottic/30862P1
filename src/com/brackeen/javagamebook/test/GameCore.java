@@ -27,6 +27,9 @@ public abstract class GameCore {
 
     private boolean isRunning;
     protected ScreenManager screen;
+    
+    //Alan
+    public static long time = 0;
 
 
     /**
@@ -110,7 +113,9 @@ public abstract class GameCore {
             long elapsedTime =
                 System.currentTimeMillis() - currTime;
             currTime += elapsedTime;
-
+            
+            //Alan
+            time += elapsedTime;
             // update
             update(elapsedTime);
 

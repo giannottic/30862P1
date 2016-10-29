@@ -48,6 +48,8 @@ public class GameManager extends GameCore {
     
     private GameAction shoot;
 
+    //Alan
+    public int health = 20;
 
     public void init() {
         super.init();
@@ -123,9 +125,11 @@ public class GameManager extends GameCore {
             float velocityX = 0;
             if (moveLeft.isPressed()) {
                 velocityX-=player.getMaxSpeed();
+                //getHealth(player, player.getX());
             }
             if (moveRight.isPressed()) {
                 velocityX+=player.getMaxSpeed();
+                //getHealth(player, player.getX());
             }
             if (jump.isPressed()) {
                 player.jump(false);
@@ -142,6 +146,11 @@ public class GameManager extends GameCore {
     public void draw(Graphics2D g) {
         renderer.draw(g, map,
             screen.getWidth(), screen.getHeight());
+        
+        //Alan
+    	Player player = (Player)map.getPlayer();
+        g.drawString("Health: "+player.getHealth(), 100, 100);
+        g.drawString("Points: test", 600, 100);
     }
 
 
