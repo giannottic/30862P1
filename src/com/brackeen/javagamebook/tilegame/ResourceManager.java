@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedList;
+
 import javax.swing.ImageIcon;
 
 import com.brackeen.javagamebook.graphics.*;
@@ -321,12 +323,15 @@ public class ResourceManager {
     
     //Cole
     public void addBullet(TileMap map, Creature creature){
-        Bullet bulletCopy = (Bullet)bulletSprite.clone();
-    	bulletCopy.setX(creature.getX() + creature.getWidth()/2 * creature.getDirection());
-    	bulletCopy.setY(creature.getY());
-    	bulletCopy.setVelocityX((float)0.5 * creature.getDirection());
-    	map.addSprite(bulletCopy);
+        Bullet newBullet = (Bullet)bulletSprite.clone();
+    	newBullet.setX(creature.getX() + creature.getWidth()/2 * creature.getDirection());
+    	newBullet.setY(creature.getY());
+    	newBullet.setVelocityX(0.8f * creature.getDirection());
+    	newBullet.setStart();
+    	map.addSprite(newBullet);
     }
+    
+   
 
     private void loadAdditionalSprites(){
     	Animation anim = new Animation();

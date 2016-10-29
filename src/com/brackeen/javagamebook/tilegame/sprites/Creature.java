@@ -179,5 +179,9 @@ public abstract class Creature extends Sprite {
     public int getDirection(){
     	return direction;
     }
+    
+    public void timerEvent(){
+    	
+    }
 
 }

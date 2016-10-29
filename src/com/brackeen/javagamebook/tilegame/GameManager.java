@@ -15,6 +15,7 @@ import com.brackeen.javagamebook.sound.*;
 import com.brackeen.javagamebook.input.*;
 import com.brackeen.javagamebook.test.GameCore;
 import com.brackeen.javagamebook.tilegame.sprites.*;
+import ca.sprites.*;
 
 /**
     GameManager manages all parts of the game.
@@ -33,8 +34,8 @@ public class GameManager extends GameCore implements ActionListener{
 
     public static final float GRAVITY = 0.002f;
     
-    public static final int BULLET_DISTANCE = 1000;
-    public static final int AUTO_SHOOT_PERIOD = 10;
+    public static final int BULLET_DISTANCE = 500;
+    public static final int AUTO_SHOOT_PERIOD = 60;
 
     private Point pointCache = new Point();
     private TileMap map;
@@ -144,6 +145,9 @@ public class GameManager extends GameCore implements ActionListener{
             		
             	}
             	player.updateAuto(AUTO_SHOOT_PERIOD);
+            }
+            else{
+            	player.wakeUp();
             }
             player.setVelocityX(velocityX);
         }
@@ -304,6 +308,11 @@ public class GameManager extends GameCore implements ActionListener{
                     updateCreature(creature, elapsedTime);
                 }
             }
+            else if (sprite instanceof Bullet){
+            	if (Math.abs(((Bullet)sprite).getStartPos() - sprite.getX()) > BULLET_DISTANCE){
+            		i.remove();
+            	}
+            }
             // normal update
             sprite.update(elapsedTime);
         }
@@ -375,6 +384,9 @@ public class GameManager extends GameCore implements ActionListener{
             boolean canKill = (oldY < creature.getY());
             checkPlayerCollision((Player)creature, canKill);
         }
+        else if (creature instanceof Creature){
+        	checkEnemyCollision((Creature)creature);
+        }
 
     }
 
@@ -410,6 +422,24 @@ public class GameManager extends GameCore implements ActionListener{
                 player.setState(Creature.STATE_DYING);
             }
         }
+        else if (collisionSprite instanceof Bullet){
+        	Bullet bullet = (Bullet)collisionSprite;
+        	if (bullet.getType() == Bullet.ENEMY_BULLET){
+        		player.setState(Creature.STATE_DYING);
+        	}
+        }
+    }
+    
+    //Cole
+    public void checkEnemyCollision(Creature enemy){
+    	if (!enemy.isAlive()) return;
+    	Sprite collisionSprite = getSpriteCollision(enemy);
+    	if (collisionSprite instanceof Bullet){
+    		Bullet bullet = (Bullet)collisionSprite;
+    		if (bullet.getType() == Bullet.PLAYER_BULLET){
+    			enemy.setState(Creature.STATE_DYING);
+    		}
+    	}
     }
 
 
