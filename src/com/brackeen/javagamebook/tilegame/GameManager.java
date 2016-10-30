@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
@@ -15,6 +16,7 @@ import com.brackeen.javagamebook.sound.*;
 import com.brackeen.javagamebook.input.*;
 import com.brackeen.javagamebook.test.GameCore;
 import com.brackeen.javagamebook.tilegame.sprites.*;
+import ca.sprites.*;
 
 /**
     GameManager manages all parts of the game.
@@ -33,8 +35,8 @@ public class GameManager extends GameCore implements ActionListener{
 
     public static final float GRAVITY = 0.002f;
     
-    public static final int BULLET_DISTANCE = 1000;
-    public static final int AUTO_SHOOT_PERIOD = 10;
+    public static final int BULLET_DISTANCE = 400;
+    public static final long AUTO_SHOOT_TIME = 250;
 
     private Point pointCache = new Point();
     private TileMap map;
@@ -52,6 +54,8 @@ public class GameManager extends GameCore implements ActionListener{
     private GameAction exit;
     //Cole
     private GameAction shoot;
+    
+    private LinkedList<Creature> shootingList;
 
 
     public void init() {
@@ -83,11 +87,13 @@ public class GameManager extends GameCore implements ActionListener{
             midiPlayer.getSequence("sounds/music.midi");
         midiPlayer.play(sequence, true);
         toggleDrumPlayback();
+        
+        shootingList = new LinkedList<Creature>();
     }
 
 
     /**
-        Closes any resurces used by the GameManager.
+        Closes any resources used by the GameManager.
     */
     public void stop() {
         super.stop();
@@ -138,12 +144,14 @@ public class GameManager extends GameCore implements ActionListener{
             }
             //Cole - shoot
             if (shoot.isPressed()){
-            	if (player.canShoot(AUTO_SHOOT_PERIOD)){
+            	if (player.canShoot(AUTO_SHOOT_TIME)){
             		//TODO shoot
             		resourceManager.addBullet(map, player);
-            		
+            		player.updateAuto(AUTO_SHOOT_TIME);
             	}
-            	player.updateAuto(AUTO_SHOOT_PERIOD);
+            }
+            else{
+            	player.wakeUp();
             }
             player.setVelocityX(velocityX);
         }
@@ -304,8 +312,17 @@ public class GameManager extends GameCore implements ActionListener{
                     updateCreature(creature, elapsedTime);
                 }
             }
+            else if (sprite instanceof Bullet){
+            	if (Math.abs(((Bullet)sprite).getStartPos() - sprite.getX()) > BULLET_DISTANCE){
+            		i.remove();
+            	}
+            }
             // normal update
             sprite.update(elapsedTime);
+        }
+        while (!shootingList.isEmpty()){
+        	Creature creature = shootingList.pop();
+        	resourceManager.addBullet(map, creature);
         }
     }
 
@@ -375,7 +392,17 @@ public class GameManager extends GameCore implements ActionListener{
             boolean canKill = (oldY < creature.getY());
             checkPlayerCollision((Player)creature, canKill);
         }
+        else if (creature instanceof Creature){
+        	checkEnemyCollision(creature);
+        	tryEnemyShoot(creature);
+        }
 
+    }
+    
+    private void tryEnemyShoot(Creature enemy){
+    	if (enemy.canShoot(AUTO_SHOOT_TIME * 2)){
+    		shootingList.add(enemy);
+    	}
     }
 
 
@@ -410,6 +437,24 @@ public class GameManager extends GameCore implements ActionListener{
                 player.setState(Creature.STATE_DYING);
             }
         }
+        else if (collisionSprite instanceof Bullet){
+        	Bullet bullet = (Bullet)collisionSprite;
+        	if (bullet.getType() == Bullet.ENEMY_BULLET){
+        		player.setState(Creature.STATE_DYING);
+        	}
+        }
+    }
+    
+    //Cole
+    public void checkEnemyCollision(Creature enemy){
+    	if (!enemy.isAlive()) return;
+    	Sprite collisionSprite = getSpriteCollision(enemy);
+    	if (collisionSprite instanceof Bullet){
+    		Bullet bullet = (Bullet)collisionSprite;
+    		if (bullet.getType() == Bullet.PLAYER_BULLET){
+    			enemy.setState(Creature.STATE_DYING);
+    		}
+    	}
     }
 
 
