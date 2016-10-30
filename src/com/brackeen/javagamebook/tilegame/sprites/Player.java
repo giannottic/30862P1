@@ -84,13 +84,16 @@ public class Player extends Creature {
 //    	if (getVelocityX() != 0.0) {
 //    		vel_bool = true;
 //    	}
+    	//System.out.println(sprite.getWidth()); //80
+    	//System.out.println(curr_pos - nxt_pos);
+    	//System.out.println(cur_position);
     	
-//    	if (!isFlying() & Math.round(Math.abs(getVelocityX())) == 0) {
-//    		if (GameCore.time > 2000) {
-//    			health += 5;
-//        		GameCore.time = 0;
-//    		}
-//    	}
+    	if (!isFlying() & Math.round(Math.abs(getVelocityX())) == 0) {
+    		if (GameCore.time > 2500) {
+    			health += 5;
+        		GameCore.time = 0;
+    		}
+    	}
     	
     	double nxt_pos = getX();
     	if (Math.abs(nxt_pos - cur_pos) > getWidth()) {
@@ -98,15 +101,10 @@ public class Player extends Creature {
     		health += 1;
     		cur_pos = nxt_pos;
     	}
-    	
-    	
+    		
     	if (health > 40) {
     		return 40;
     	}
-    
-    	//System.out.println(sprite.getWidth()); //80
-    	//System.out.println(curr_pos - nxt_pos);
-    	//System.out.println(cur_position);
     	return health;
     }
 

@@ -90,15 +90,21 @@ public class ResourceManager {
             currentMap++;
             try {
                 map = loadMap(
-                    "maps/map" + currentMap + ".txt");
+                		//"maps/default.txt");
+                		"maps/map" + currentMap + ".txt");
             }
             catch (IOException ex) {
-                if (currentMap == 1) {
-                    // no maps to load!
-                    return null;
+//                if (currentMap == 1) {
+//                    // no maps to load!
+//                    return null;
+//                }
+                //currentMap = 0;
+                try {
+                	map = loadMap("maps/default.txt");
                 }
-                currentMap = 0;
-                map = null;
+                catch (IOException e) {
+                	return null;
+                }
             }
         }
 
