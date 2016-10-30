@@ -327,6 +327,9 @@ public class ResourceManager {
     	newBullet.setX(creature.getX() + creature.getWidth()/2 * creature.getDirection());
     	newBullet.setY(creature.getY());
     	newBullet.setVelocityX(0.8f * creature.getDirection());
+    	if (!(creature instanceof Player)){
+    		newBullet.setType(Bullet.ENEMY_BULLET);
+    	}
     	newBullet.setStart();
     	map.addSprite(newBullet);
     }

@@ -53,4 +53,13 @@ public class Bullet extends Sprite {
             return null;
         }
     }
+    
+    public void setType(int ownership){
+    	if (ownership == ENEMY_BULLET){
+    		ownerType = ENEMY_BULLET;
+    	}
+    	else{
+    		ownerType = PLAYER_BULLET;
+    	}
+    }
 }

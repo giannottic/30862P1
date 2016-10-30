@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
@@ -34,8 +35,8 @@ public class GameManager extends GameCore implements ActionListener{
 
     public static final float GRAVITY = 0.002f;
     
-    public static final int BULLET_DISTANCE = 500;
-    public static final int AUTO_SHOOT_PERIOD = 60;
+    public static final int BULLET_DISTANCE = 400;
+    public static final long AUTO_SHOOT_TIME = 250;
 
     private Point pointCache = new Point();
     private TileMap map;
@@ -53,6 +54,8 @@ public class GameManager extends GameCore implements ActionListener{
     private GameAction exit;
     //Cole
     private GameAction shoot;
+    
+    private LinkedList<Creature> shootingList;
 
 
     public void init() {
@@ -84,11 +87,13 @@ public class GameManager extends GameCore implements ActionListener{
             midiPlayer.getSequence("sounds/music.midi");
         midiPlayer.play(sequence, true);
         toggleDrumPlayback();
+        
+        shootingList = new LinkedList<Creature>();
     }
 
 
     /**
-        Closes any resurces used by the GameManager.
+        Closes any resources used by the GameManager.
     */
     public void stop() {
         super.stop();
@@ -139,12 +144,11 @@ public class GameManager extends GameCore implements ActionListener{
             }
             //Cole - shoot
             if (shoot.isPressed()){
-            	if (player.canShoot(AUTO_SHOOT_PERIOD)){
+            	if (player.canShoot(AUTO_SHOOT_TIME)){
             		//TODO shoot
             		resourceManager.addBullet(map, player);
-            		
+            		player.updateAuto(AUTO_SHOOT_TIME);
             	}
-            	player.updateAuto(AUTO_SHOOT_PERIOD);
             }
             else{
             	player.wakeUp();
@@ -316,6 +320,10 @@ public class GameManager extends GameCore implements ActionListener{
             // normal update
             sprite.update(elapsedTime);
         }
+        while (!shootingList.isEmpty()){
+        	Creature creature = shootingList.pop();
+        	resourceManager.addBullet(map, creature);
+        }
     }
 
 
@@ -385,9 +393,16 @@ public class GameManager extends GameCore implements ActionListener{
             checkPlayerCollision((Player)creature, canKill);
         }
         else if (creature instanceof Creature){
-        	checkEnemyCollision((Creature)creature);
+        	checkEnemyCollision(creature);
+        	tryEnemyShoot(creature);
         }
 
+    }
+    
+    private void tryEnemyShoot(Creature enemy){
+    	if (enemy.canShoot(AUTO_SHOOT_TIME * 2)){
+    		shootingList.add(enemy);
+    	}
     }
 
 

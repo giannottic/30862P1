@@ -25,7 +25,9 @@ public abstract class Creature extends Sprite {
     private Animation deadRight;
     private int state;
     private long stateTime;
-    private int direction = 1;
+    private long timeSinceShoot;
+    private int direction;
+    protected boolean awake;
 
     /**
         Creates a new Creature with the specified Animations.
@@ -39,6 +41,7 @@ public abstract class Creature extends Sprite {
         this.deadLeft = deadLeft;
         this.deadRight = deadRight;
         state = STATE_NORMAL;
+        direction = 1;
     }
 
 
@@ -76,6 +79,7 @@ public abstract class Creature extends Sprite {
     public void wakeUp() {
         if (getState() == STATE_NORMAL && getVelocityX() == 0) {
             setVelocityX(-getMaxSpeed());
+            awake = true;
         }
     }
 
@@ -140,7 +144,7 @@ public abstract class Creature extends Sprite {
 
 
     /**
-        Updates the animaton for this creature.
+        Updates the animation for this creature.
     */
     public void update(long elapsedTime) {
         // select the correct Animation
@@ -174,14 +178,23 @@ public abstract class Creature extends Sprite {
         if (state == STATE_DYING && stateTime >= DIE_TIME) {
             setState(STATE_DEAD);
         }
+        else if (state == STATE_NORMAL && awake){
+        	timeSinceShoot += elapsedTime;
+        }
     }
     
     public int getDirection(){
     	return direction;
     }
     
-    public void timerEvent(){
-    	
+    public boolean canShoot(long shootPeriod){
+    	if (state == STATE_NORMAL && timeSinceShoot >= shootPeriod){
+    		timeSinceShoot = 0;
+    		return true;
+    	}
+    	else{
+    		return false;
+    	}
     }
 
 }

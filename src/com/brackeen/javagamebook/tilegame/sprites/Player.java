@@ -19,7 +19,6 @@ public class Player extends Creature{
     private boolean onGround;
     private boolean onCooldown;
     private int autoShots;
-    private int direction;
 
     public Player(Animation left, Animation right,
         Animation deadLeft, Animation deadRight)
@@ -54,6 +53,7 @@ public class Player extends Creature{
     public void wakeUp() {
     	onCooldown = false;
     	autoShots = 0;
+    	awake = true;
     }
 
 
@@ -77,6 +77,14 @@ public class Player extends Creature{
 			}
 		}
     }
+    public void updateAuto(long autoTime){
+    	if (!onCooldown){
+    		autoShots += 1;
+    		if (autoShots >= 10){
+    			startCooldown();
+    		}
+    	}
+    }
     
     public void startCooldown(){
     	onCooldown = true;
@@ -95,6 +103,10 @@ public class Player extends Creature{
     	else{
     		return false;
     	}
+    }
+    
+    public boolean canShoot(long autoPeriod){
+    	return super.canShoot(autoPeriod) && !onCooldown;
     }
 
     public float getMaxSpeed() {
