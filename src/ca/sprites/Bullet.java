@@ -26,9 +26,18 @@ public class Bullet extends Sprite {
 	public static final int ENEMY_BULLET = 1;
 	
 	private int ownerType;
-
+	private float startPos;
+	
 	public int getType(){
 		return ownerType;
+	}
+	
+	public float getStartPos(){
+		return startPos;
+	}
+	
+	public void setStart(){
+		startPos = this.getX();
 	}
 	
     public Object clone() {
@@ -43,5 +52,14 @@ public class Bullet extends Sprite {
             ex.printStackTrace();
             return null;
         }
+    }
+    
+    public void setType(int ownership){
+    	if (ownership == ENEMY_BULLET){
+    		ownerType = ENEMY_BULLET;
+    	}
+    	else{
+    		ownerType = PLAYER_BULLET;
+    	}
     }
 }

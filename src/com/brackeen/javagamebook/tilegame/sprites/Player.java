@@ -6,17 +6,19 @@ import com.brackeen.javagamebook.tilegame.ResourceManager;
 import com.brackeen.javagamebook.tilegame.TileMap;
 import com.brackeen.javagamebook.tilegame.TileMapRenderer;
 import ca.sprites.*;
+import java.util.*;
+import ca.thread.*;
 
 /**
     The Player.
 */
-public class Player extends Creature {
+public class Player extends Creature{
 
     private static final float JUMP_SPEED = -.95f;
 
     private boolean onGround;
-    private int autoShots = 0;
-    private int direction;
+    private boolean onCooldown;
+    private int autoShots;
 
     public Player(Animation left, Animation right,
         Animation deadLeft, Animation deadRight)
@@ -49,7 +51,9 @@ public class Player extends Creature {
 
 
     public void wakeUp() {
-        // do nothing
+    	onCooldown = false;
+    	autoShots = 0;
+    	awake = true;
     }
 
 
@@ -65,30 +69,44 @@ public class Player extends Creature {
     }
     
     public void updateAuto(int autoPeriod){
-    	autoShots += 1;
-    	autoShots %= autoPeriod * 10;
-    	if (autoShots == 0){
-    		//startCooldown
+    	if (!onCooldown) {
+			autoShots += 1;
+			autoShots %= autoPeriod * 10;
+			if (autoShots == 0) {
+				startCooldown();
+			}
+		}
+    }
+    public void updateAuto(long autoTime){
+    	if (!onCooldown){
+    		autoShots += 1;
+    		if (autoShots >= 10){
+    			startCooldown();
+    		}
     	}
     }
     
-    public void endCooldown(){
-    	//autoShots = 0;
-    }
-    
     public void startCooldown(){
-    	//autoShots = 10;
+    	onCooldown = true;
+    	Timer timer = new Timer();
+    	timer.schedule(new TimerThread(this), 1000);
     }
+   
     
     public boolean canShoot(int autoPeriod){
-    	//if (coolDown){
-    		//false
-    	if (autoShots % autoPeriod == 0){
+    	if (onCooldown){
+    		return false;
+    	}
+    	else if (autoShots % autoPeriod == 0){
     		return true;
     	}
     	else{
     		return false;
     	}
+    }
+    
+    public boolean canShoot(long autoPeriod){
+    	return super.canShoot(autoPeriod) && !onCooldown;
     }
 
     public float getMaxSpeed() {

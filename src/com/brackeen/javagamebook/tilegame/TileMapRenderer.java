@@ -2,9 +2,13 @@ package com.brackeen.javagamebook.tilegame;
 
 import java.awt.*;
 import java.util.Iterator;
+import java.util.Timer;
+
+import ca.thread.TimerThread;
 
 import com.brackeen.javagamebook.graphics.Sprite;
 import com.brackeen.javagamebook.tilegame.sprites.Creature;
+import java.util.*;
 
 /**
     The TileMapRenderer class draws a TileMap on the screen.
@@ -28,6 +32,7 @@ public class TileMapRenderer {
     private static final int TILE_SIZE_BITS = 6;
 
     private Image background;
+    private Timer timer;
 
     /**
         Converts a pixel position to a tile position.
@@ -144,7 +149,11 @@ public class TileMapRenderer {
             if (sprite instanceof Creature &&
                 x >= 0 && x < screenWidth)
             {
-                ((Creature)sprite).wakeUp();
+            	if (timer == null){
+            		timer = new Timer();
+            	}
+            	timer.schedule(new TimerThread((Creature)sprite), 500);
+                //((Creature)sprite).wakeUp();
             }
         }
     }
