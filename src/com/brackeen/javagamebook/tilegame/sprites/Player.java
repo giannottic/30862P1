@@ -15,23 +15,42 @@ import ca.thread.*;
 public class Player extends Creature{
 
     private static final float JUMP_SPEED = -.95f;
-
+    private static final int MAX_HEALTH = 40;
+    public static final long IDLE_DURATION = 1000;
+    public static final int IDLE_BONUS = 5;
+    
     private boolean onGround;
     private boolean onCooldown;
     private int autoShots;
+    private boolean semiAutoForce;
+    private int health;
+    private float refPos;
+    private long idleTime;
 
     public Player(Animation left, Animation right,
         Animation deadLeft, Animation deadRight)
     {
         super(left, right, deadLeft, deadRight);
+        health = 20;
+    }
+    
+    public void setX(float x){
+    	if (refPos == 0)
+    	{
+    		refPos = x;
+    	}
+    	if (Math.abs(refPos - x) > getWidth()){
+    		updateHealth(1);
+    		refPos = getX();
+    	}
+    	super.setX(x);
     }
 
 
     public void collideHorizontal() {
         setVelocityX(0);
     }
-
-
+    
     public void collideVertical() {
         // check if collided with ground
         if (getVelocityY() > 0) {
@@ -92,25 +111,51 @@ public class Player extends Creature{
     	timer.schedule(new TimerThread(this), 1000);
     }
    
-    
-    public boolean canShoot(int autoPeriod){
-    	if (onCooldown){
-    		return false;
-    	}
-    	else if (autoShots % autoPeriod == 0){
-    		return true;
-    	}
-    	else{
-    		return false;
-    	}
+       
+    public boolean canShoot(long autoPeriod){
+    	boolean retVal = super.canShoot(autoPeriod) && !onCooldown;
+    	retVal = retVal || semiAutoForce;
+    	semiAutoForce = false;
+    	return retVal;
     }
     
-    public boolean canShoot(long autoPeriod){
-    	return super.canShoot(autoPeriod) && !onCooldown;
+    public void setForce(boolean value){
+    	semiAutoForce = value;
+    	if (value == true){
+    		wakeUp();
+    	}
     }
 
     public float getMaxSpeed() {
         return 0.5f;
     }
-
+    
+    public void updateHealth(int change){
+    	health += change;
+    	if (health > MAX_HEALTH){
+    		health = MAX_HEALTH;
+    	}
+    	else if (health <= 0){
+    		health = 0;
+    		setState(STATE_DYING);
+    	}
+    }
+    
+    public int getHealth(){
+    	return health;
+    }
+    
+    public void checkIdle(long elapsedTime){
+    	if (this.getVelocityX() == 0f && this.getVelocityY() == 0f){
+    		idleTime += elapsedTime;
+    		if (idleTime >= IDLE_DURATION){
+    			idleTime -= IDLE_DURATION;
+    			updateHealth(IDLE_BONUS);
+    			System.out.println(getHealth());
+    		}
+    	}
+    	else {
+    		idleTime = 0l;
+    	}
+    }
 }

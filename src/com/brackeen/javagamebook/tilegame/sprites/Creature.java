@@ -8,7 +8,7 @@ import com.brackeen.javagamebook.graphics.*;
     die. It has four Animations: moving left, moving right,
     dying on the left, and dying on the right.
 */
-public abstract class Creature extends Sprite {
+public abstract class Creature extends Sprite{
 
     /**
         Amount of time to go from STATE_DYING to STATE_DEAD.

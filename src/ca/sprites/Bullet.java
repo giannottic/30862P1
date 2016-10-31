@@ -27,6 +27,7 @@ public class Bullet extends Sprite {
 	
 	private int ownerType;
 	private float startPos;
+	private boolean hasHit;
 	
 	public int getType(){
 		return ownerType;
@@ -61,5 +62,13 @@ public class Bullet extends Sprite {
     	else{
     		ownerType = PLAYER_BULLET;
     	}
+    }
+    
+    public boolean getHasHit(){
+    	return hasHit;
+    }
+    
+    public void setHasHit(boolean value){
+    	hasHit = value;
     }
 }

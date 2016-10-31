@@ -37,6 +37,8 @@ public class GameManager extends GameCore implements ActionListener{
     
     public static final int BULLET_DISTANCE = 400;
     public static final long AUTO_SHOOT_TIME = 250;
+    public static final int BULLET_DAMAGE = -5;
+    public static final boolean ALLOW_BOUNCE_JUMP = false;
 
     private Point pointCache = new Point();
     private TileMap map;
@@ -56,6 +58,9 @@ public class GameManager extends GameCore implements ActionListener{
     private GameAction shoot;
     
     private LinkedList<Creature> shootingList;
+    
+    private int points;
+    private long idleTime;
 
 
     public void init() {
@@ -89,6 +94,7 @@ public class GameManager extends GameCore implements ActionListener{
         toggleDrumPlayback();
         
         shootingList = new LinkedList<Creature>();
+        idleTime = 0;
     }
 
 
@@ -132,28 +138,43 @@ public class GameManager extends GameCore implements ActionListener{
 
         Player player = (Player)map.getPlayer();
         if (player.isAlive()) {
+        	boolean isIdle = true;
             float velocityX = 0;
             if (moveLeft.isPressed()) {
                 velocityX-=player.getMaxSpeed();
+                isIdle = false;
             }
             if (moveRight.isPressed()) {
                 velocityX+=player.getMaxSpeed();
+                isIdle = false;
             }
             if (jump.isPressed()) {
                 player.jump(false);
+                isIdle = false;
             }
             //Cole - shoot
             if (shoot.isPressed()){
             	if (player.canShoot(AUTO_SHOOT_TIME)){
             		//TODO shoot
+            		//soundManager.play(boopSound);
             		resourceManager.addBullet(map, player);
             		player.updateAuto(AUTO_SHOOT_TIME);
             	}
             }
             else{
-            	player.wakeUp();
+            	player.setForce(true);
             }
             player.setVelocityX(velocityX);
+            if (isIdle){
+            	idleTime += elapsedTime;
+            	if (idleTime >= Player.IDLE_DURATION){
+            		idleTime -= Player.IDLE_DURATION;
+            		player.updateHealth(Player.IDLE_BONUS);
+            	}
+            }
+            else{
+            	idleTime = 0;
+            }
         }
 
     }
@@ -162,6 +183,10 @@ public class GameManager extends GameCore implements ActionListener{
     public void draw(Graphics2D g) {
         renderer.draw(g, map,
             screen.getWidth(), screen.getHeight());
+        Player player = (Player)map.getPlayer();
+        //CHANGE ME
+        g.drawString("Health: "+player.getHealth(), 100, 100);
+        g.drawString("Points: "+points, 600, 100);
     }
 
 
@@ -283,7 +308,7 @@ public class GameManager extends GameCore implements ActionListener{
         in the current map.
     */
     public void update(long elapsedTime) {
-        Creature player = (Creature)map.getPlayer();
+        Player player = (Player)map.getPlayer();
 
 
         // player is dead! start map over
@@ -322,6 +347,7 @@ public class GameManager extends GameCore implements ActionListener{
         }
         while (!shootingList.isEmpty()){
         	Creature creature = shootingList.pop();
+        	//soundManager.play(boopSound);
         	resourceManager.addBullet(map, creature);
         }
     }
@@ -411,7 +437,8 @@ public class GameManager extends GameCore implements ActionListener{
         canKill is true, collisions with Creatures will kill
         them.
     */
-    public void checkPlayerCollision(Player player,
+    @SuppressWarnings("unused")
+	public void checkPlayerCollision(Player player,
         boolean canKill)
     {
         if (!player.isAlive()) {
@@ -425,22 +452,23 @@ public class GameManager extends GameCore implements ActionListener{
         }
         else if (collisionSprite instanceof Creature) {
             Creature badguy = (Creature)collisionSprite;
-            if (canKill) {
+            if (canKill && ALLOW_BOUNCE_JUMP) {
                 // kill the badguy and make player bounce
-                soundManager.play(boopSound);
-                badguy.setState(Creature.STATE_DYING);
+                killEnemy(badguy);
                 player.setY(badguy.getY() - player.getHeight());
                 player.jump(true);
+                
             }
             else {
                 // player dies!
-                player.setState(Creature.STATE_DYING);
+            	killPlayer(player);
             }
         }
         else if (collisionSprite instanceof Bullet){
         	Bullet bullet = (Bullet)collisionSprite;
-        	if (bullet.getType() == Bullet.ENEMY_BULLET){
-        		player.setState(Creature.STATE_DYING);
+        	if (bullet.getType() == Bullet.ENEMY_BULLET && !bullet.getHasHit()){
+        		bullet.setHasHit(true);
+        		hitPlayer(player);
         	}
         }
     }
@@ -452,7 +480,7 @@ public class GameManager extends GameCore implements ActionListener{
     	if (collisionSprite instanceof Bullet){
     		Bullet bullet = (Bullet)collisionSprite;
     		if (bullet.getType() == Bullet.PLAYER_BULLET){
-    			enemy.setState(Creature.STATE_DYING);
+    			killEnemy(enemy);
     		}
     	}
     }
@@ -483,7 +511,28 @@ public class GameManager extends GameCore implements ActionListener{
         }
     }
 
-
+    private void killEnemy(Creature enemy){
+    	soundManager.play(boopSound);
+    	updatePoints(1);
+    	enemy.setState(Creature.STATE_DYING);
+    }
+    private void updatePoints(int change){
+    	points += change;
+    }
+    
+    private void hitPlayer(Player player){
+    	player.updateHealth(BULLET_DAMAGE);
+    	if (!player.isAlive()){
+    		killPlayer(player);
+    	}
+    }
+    private void killPlayer(Player player){
+    	soundManager.play(boopSound);
+        player.setState(Creature.STATE_DYING);
+    	points = 0;
+    	
+    }
+    
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		// TODO Auto-generated method stub
